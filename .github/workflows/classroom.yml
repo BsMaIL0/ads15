@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   Checking-Solution:
-    runs-on: gtest
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Get repository code
@@ -176,9 +176,8 @@ jobs:
 
       - name: Memory leaks
         run: |
+             sudo apt-get update && sudo apt-get install -y valgrind
              valgrind --tool=memcheck --leak-check=full --undef-value-errors=no --error-exitcode=111 ./build/findsubstr 37df7a98468d1f7a tests/log.txt
-      - name: Checkout
-        uses: actions/checkout@v6
       - name: CPD
         uses: amcp-pit/cpd-action@v1
         id: cpd
