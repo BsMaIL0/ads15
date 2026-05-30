@@ -20,6 +20,10 @@ jobs:
     steps:
       - name: Get repository code
         uses: actions/checkout@v6
+      - name: Fix permissions
+        run: |
+          chmod +x scripts/*.sh
+          chmod +x build.sh 2>/dev/null || true
       - name: Check repository clean
         run: ./scripts/check_clean.sh
       - name: Check requirements
@@ -27,6 +31,7 @@ jobs:
              !(grep -qwRE --include=*.{cc,cpp,h,hpp} '<vector>|<list>|<string>|<algorithm>|<stack>|<queue>|<deque>|<set>|<map>|<bits' ./* ) &&  (echo \"Check - OK\" )  || ( echo \"Forbiden STL containers\" && exit 9 )
       - name: Check code style
         run: |
+             sudo apt-get update && sudo apt-get install -y clang-format
              clang-format --version
              find "." \( -name '*.cpp' -o -name '*.h*' \) -print0 | xargs -0 clang-format --dry-run --Werror --verbose
       - name: Code linting
@@ -36,7 +41,9 @@ jobs:
           extra-args: '-std=c++20'
           after-args: '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON'
       - name: Build
-        run: ./scripts/build.sh
+        run: |
+          chmod +x scripts/build.sh
+          ./scripts/build.sh
       - name: Test 1
         id: test-1
         uses: classroom-resources/autograding-io-grader@v1
@@ -177,6 +184,7 @@ jobs:
       - name: Memory leaks
         run: |
              sudo apt-get update && sudo apt-get install -y valgrind
+             chmod +x ./build/findsubstr 2>/dev/null || true
              valgrind --tool=memcheck --leak-check=full --undef-value-errors=no --error-exitcode=111 ./build/findsubstr 37df7a98468d1f7a tests/log.txt
       - name: CPD
         uses: amcp-pit/cpd-action@v1
